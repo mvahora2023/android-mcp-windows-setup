@@ -1,0 +1,15 @@
+name: Dashboard UI static checks
+on:
+  push:
+    branches: [master]
+    paths: ['dashboard/**', 'tests/dashboard_ui.test.mjs', '.github/workflows/dashboard-tests.yml']
+  pull_request:
+    paths: ['dashboard/**', 'tests/dashboard_ui.test.mjs', '.github/workflows/dashboard-tests.yml']
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --test tests/dashboard_ui.test.mjs
