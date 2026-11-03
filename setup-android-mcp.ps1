@@ -5,21 +5,24 @@
 
 $ErrorActionPreference = "Continue"
 
-$PYTHON        = "C:\Users\makin\AppData\Local\Python\bin\python.exe"
-$PIP           = "C:\Users\makin\AppData\Local\Python\bin\pip.exe"
-$ADB           = "C:\Users\makin\AppData\Local\Android\Sdk\platform-tools\adb.exe"
-$BRIDGE_BACKUP = "C:\Users\makin\.claude\scripts\uiautomator2_bridge.py"
-$CLAUDE_JSON   = "C:\Users\makin\.claude.json"
+# Portable defaults for typical per-user Windows installs.
+# Override these paths if your Python or Android SDK lives elsewhere.
+$ANDROID_HOME  = Join-Path $env:LOCALAPPDATA "Android\Sdk"
+$PYTHON        = Join-Path $env:LOCALAPPDATA "Python\bin\python.exe"
+$PIP           = Join-Path $env:LOCALAPPDATA "Python\bin\pip.exe"
+$ADB           = Join-Path $ANDROID_HOME "platform-tools\adb.exe"
+$BRIDGE_BACKUP = Join-Path $PSScriptRoot "uiautomator2_bridge.py"
+$CLAUDE_JSON   = Join-Path $env:USERPROFILE ".claude.json"
 
-$MCP_ENV_PATH = "C:\Users\makin\AppData\Local\Android\Sdk\platform-tools;" +
-    "C:\Users\makin\AppData\Local\Python\bin;" +
-    "C:\Users\makin\AppData\Local\Python\pythoncore-3.14-64\Scripts;" +
-    "C:\Users\makin\AppData\Roaming\npm;" +
-    "C:\Program Files\nodejs;" +
-    "C:\Windows\system32;" +
-    "C:\Windows;" +
-    "C:\Windows\System32\Wbem;" +
-    "C:\Windows\System32\WindowsPowerShell\v1.0"
+# Put real Python / ADB / npm ahead of Windows Store aliases, while keeping
+# the rest of the existing PATH. No machine-specific user directory is stored.
+$MCP_ENV_PATH = @(
+    (Split-Path $ADB),
+    (Split-Path $PYTHON),
+    (Split-Path $PIP),
+    (Join-Path $env:APPDATA "npm"),
+    $env:PATH
+) -join ";"
 
 function Write-Step($msg) { Write-Host "" ; Write-Host "==> $msg" -ForegroundColor Cyan }
 function Write-OK($msg)   { Write-Host "    [OK] $msg" -ForegroundColor Green }
@@ -124,7 +127,7 @@ $mcp = $config.mcpServers
 
 if (-not $mcp.PSObject.Properties["android-automation"]) {
     $envObj = New-Object PSObject
-    $envObj | Add-Member -NotePropertyName "ANDROID_HOME" -NotePropertyValue "C:\Users\makin\AppData\Local\Android\Sdk"
+    $envObj | Add-Member -NotePropertyName "ANDROID_HOME" -NotePropertyValue $ANDROID_HOME
     $envObj | Add-Member -NotePropertyName "PATH" -NotePropertyValue $MCP_ENV_PATH
 
     $entry = New-Object PSObject
@@ -136,16 +139,31 @@ if (-not $mcp.PSObject.Properties["android-automation"]) {
     $needsWrite = $true
     Write-INFO "android-automation entry was missing - added"
 } else {
-    $currentPath = $mcp."android-automation".env.PATH
-    if ($currentPath -ne $MCP_ENV_PATH) {
-        $mcp."android-automation".env.PATH = $MCP_ENV_PATH
+    $entry = $mcp."android-automation"
+    if (-not $entry.PSObject.Properties["env"] -or $null -eq $entry.env) {
+        $entry | Add-Member -NotePropertyName "env" -NotePropertyValue (New-Object PSObject) -Force
         $needsWrite = $true
-        Write-INFO "PATH was outdated - updated"
+    }
+    if (-not $entry.env.PSObject.Properties["ANDROID_HOME"]) {
+        $entry.env | Add-Member -NotePropertyName "ANDROID_HOME" -NotePropertyValue $ANDROID_HOME
+        $needsWrite = $true
+    } elseif ($entry.env.ANDROID_HOME -ne $ANDROID_HOME) {
+        $entry.env.ANDROID_HOME = $ANDROID_HOME
+        $needsWrite = $true
+    }
+    if (-not $entry.env.PSObject.Properties["PATH"]) {
+        $entry.env | Add-Member -NotePropertyName "PATH" -NotePropertyValue $MCP_ENV_PATH
+        $needsWrite = $true
+    } elseif ($entry.env.PATH -ne $MCP_ENV_PATH) {
+        $entry.env.PATH = $MCP_ENV_PATH
+        $needsWrite = $true
     }
 }
 
 if ($needsWrite) {
-    $config | ConvertTo-Json -Depth 20 | Out-File $CLAUDE_JSON -Encoding utf8
+    Copy-Item -Path $CLAUDE_JSON -Destination "$CLAUDE_JSON.bak" -Force
+    $json = $config | ConvertTo-Json -Depth 20
+    [System.IO.File]::WriteAllText($CLAUDE_JSON, $json, (New-Object System.Text.UTF8Encoding($false)))
     Write-OK ".claude.json updated"
 } else {
     Write-OK ".claude.json already correct - no changes needed"
@@ -163,7 +181,7 @@ if ($devices) {
     Write-OK "Device(s) connected:"
     $devices | ForEach-Object { Write-INFO "  $_" }
 } else {
-    Write-WARN "No device detected. Connect your Galaxy S25 Ultra via USB with USB debugging on."
+    Write-WARN "No Android device detected. Connect a device or start an emulator with debugging enabled."
     Write-INFO "  Verify with:    $ADB devices"
     Write-INFO "  First-time init (once connected): $PYTHON -m uiautomator2 init"
 }
