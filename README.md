@@ -181,3 +181,11 @@ If you've hit additional Windows-specific issues with android-mcp and found fixe
 ## License
 
 MIT
+
+## Interactive project dashboard (November 2026)
+
+- **[Open this project's public interactive explorer](https://arsh-project-lab.vercel.app/android-mcp-windows-setup/index.html)**
+- **[Run the standalone HTML locally](dashboard/index.html)** (no account or service required)
+- **[Open the complete public Project Lab](https://arsh-project-lab.vercel.app/)**
+
+Review a user-controlled Windows/Android setup checklist; no device connection. Source-linked sample data is embedded for offline inspection. Search, group filters and CSV export work locally; checklist review marks (where available) are browser-local only. The page is not a live backend, and changes in this repository will require a separate Vercel deployment until a Git integration is enabled. [Dashboard validation source](tests/dashboard_ui.test.mjs).
