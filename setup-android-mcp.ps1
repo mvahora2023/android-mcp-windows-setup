@@ -163,7 +163,7 @@ if (-not $mcp.PSObject.Properties["android-automation"]) {
 if ($needsWrite) {
     Copy-Item -Path $CLAUDE_JSON -Destination "$CLAUDE_JSON.bak" -Force
     $json = $config | ConvertTo-Json -Depth 20
-    [System.IO.File]::WriteAllText($CLAUDE_JSON, $json, (New-Object System.Text.UTF8Encoding($false)))
+    [System.IO.File]::WriteAllText($CLAUDE_JSON, $json, ([System.Text.UTF8Encoding]::new($false)))
     Write-OK ".claude.json updated"
 } else {
     Write-OK ".claude.json already correct - no changes needed"
