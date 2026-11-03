@@ -44,7 +44,10 @@ cd android-mcp-windows-setup
 #    Adjust PYTHON / PIP / ANDROID_HOME only if installed elsewhere.
 
 # 3. Run the setup script
-powershell -ExecutionPolicy Bypass -File setup-android-mcp.ps1
+powershell -File setup-android-mcp.ps1
+
+# After reviewing the configuration and preview:
+powershell -File setup-android-mcp.ps1 -Apply
 
 # 4. Restart Claude Code to reload MCP servers
 ```
@@ -68,6 +71,8 @@ You can re-run it after an `npm update`, but review what it will install or modi
 
 ## Configuration
 
+**Safety:** Running with no arguments is preview-only. Pass `-Apply` to install packages and modify your Claude configuration. Keep a backup of your existing config. The script has not been verified on every Windows configuration.
+
 The script now uses paths derived from your Windows user environment and its own
 repository folder. **Check that the defaults match your installation**. Python
 may live elsewhere, so update the variables at the start of
@@ -82,8 +87,8 @@ $BRIDGE_BACKUP = Join-Path $PSScriptRoot "uiautomator2_bridge.py"
 ```
 
 The MCP environment prepends Android tools and the selected Python directories to
-the current PATH. Before editing Claude's configuration, the script backs up
-`%USERPROFILE%\.claude.json` as `.claude.json.bak`.
+the current PATH. Before editing Claude's configuration, the script creates a timestamped backup
+of `%USERPROFILE%\.claude.json`.
 
 
 **Finding your real Python path:**
