@@ -37,11 +37,11 @@ This repo fixes all five and makes the setup reproducible.
 
 ```powershell
 # 1. Clone this repo
-git clone https://github.com/Datpotato125/android-mcp-windows-setup.git
+git clone https://github.com/mvahora2023/android-mcp-windows-setup.git
 cd android-mcp-windows-setup
 
-# 2. Edit setup-android-mcp.ps1 — update the four path variables at the top to match your machine
-#    $PYTHON, $PIP, $ADB, and your npm global prefix will differ
+# 2. Review the portable path defaults near the top of setup-android-mcp.ps1.
+#    Adjust PYTHON / PIP / ANDROID_HOME only if installed elsewhere.
 
 # 3. Run the setup script
 powershell -ExecutionPolicy Bypass -File setup-android-mcp.ps1
@@ -62,22 +62,29 @@ powershell -ExecutionPolicy Bypass -File setup-android-mcp.ps1
 5. **Patches `~/.claude.json`** — ensures the `android-automation` MCP entry exists with the correct PATH and ANDROID_HOME environment variables
 6. **Checks ADB device connection** — reports connected devices or warns if none found
 
-Safe to re-run after any `npm update android-mcp`.
+You can re-run it after an `npm update`, but review what it will install or modify first. The script has not been independently tested here on every Windows configuration.
 
 ---
 
 ## Configuration
 
-Open `setup-android-mcp.ps1` and update these four variables at the top:
+The script now uses paths derived from your Windows user environment and its own
+repository folder. **Check that the defaults match your installation**. Python
+may live elsewhere, so update the variables at the start of
+`setup-android-mcp.ps1` if needed:
 
 ```powershell
-$PYTHON = "C:\Path\To\Your\python.exe"       # Real Python, not the Store stub
-$PIP    = "C:\Path\To\Your\pip.exe"
-$ADB    = "C:\Path\To\Android\Sdk\platform-tools\adb.exe"
-$BRIDGE_BACKUP = "C:\Path\To\This\Repo\uiautomator2_bridge.py"
+$ANDROID_HOME  = Join-Path $env:LOCALAPPDATA "Android\Sdk"
+$PYTHON        = Join-Path $env:LOCALAPPDATA "Python\bin\python.exe"
+$PIP           = Join-Path $env:LOCALAPPDATA "Python\bin\pip.exe"
+$ADB           = Join-Path $ANDROID_HOME "platform-tools\adb.exe"
+$BRIDGE_BACKUP = Join-Path $PSScriptRoot "uiautomator2_bridge.py"
 ```
 
-Also update `$MCP_ENV_PATH` to include all directories that need to be visible to the MCP server process (Python bin, Python Scripts, npm global, ADB platform-tools, Windows system dirs).
+The MCP environment prepends Android tools and the selected Python directories to
+the current PATH. Before editing Claude's configuration, the script backs up
+`%USERPROFILE%\.claude.json` as `.claude.json.bak`.
+
 
 **Finding your real Python path:**
 
@@ -113,7 +120,7 @@ Then restart Claude Code. The `android-automation` MCP tools should now appear.
 
 ## Claude Code MCP Config
 
-The script automatically writes this to `~/.claude.json`. If you prefer to configure it manually:
+The script updates the per-user `.claude.json` file and writes a backup before changes. If you prefer to configure it manually:
 
 ```json
 {
