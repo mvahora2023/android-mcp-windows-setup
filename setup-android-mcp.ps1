@@ -1,8 +1,18 @@
 # setup-android-mcp.ps1
 # Idempotent setup script for android-mcp on Windows.
 # Run this after any npm update, new machine setup, or if android-mcp stops working.
-# Usage: powershell -ExecutionPolicy Bypass -File setup-android-mcp.ps1
+# Usage: powershell -File setup-android-mcp.ps1          # preview only
+#        powershell -File setup-android-mcp.ps1 -Apply    # install/configure
 
+[CmdletBinding()]
+param([switch]$Apply)
+if (-not $Apply) {
+    Write-Output 'PREVIEW: this script installs the android-mcp npm package, installs'
+    Write-Output 'uiautomator2, repairs a Python bridge inside the npm installation,'
+    Write-Output 'and updates Claude Code MCP configuration after backing it up.'
+    Write-Output 'No changes made. Review the paths and run with -Apply to proceed.'
+    return
+}
 $ErrorActionPreference = "Continue"
 
 # Portable defaults for typical per-user Windows installs.
@@ -161,7 +171,9 @@ if (-not $mcp.PSObject.Properties["android-automation"]) {
 }
 
 if ($needsWrite) {
-    Copy-Item -Path $CLAUDE_JSON -Destination "$CLAUDE_JSON.bak" -Force
+    $backupPath = "$CLAUDE_JSON.bak.$(Get-Date -Format yyyyMMdd_HHmmss)"
+    Copy-Item -Path $CLAUDE_JSON -Destination $backupPath -ErrorAction Stop
+    Write-INFO "Configuration backup: $backupPath"
     $json = $config | ConvertTo-Json -Depth 20
     [System.IO.File]::WriteAllText($CLAUDE_JSON, $json, ([System.Text.UTF8Encoding]::new($false)))
     Write-OK ".claude.json updated"
