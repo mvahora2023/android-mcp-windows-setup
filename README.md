@@ -189,3 +189,11 @@ MIT
 - **[Open the complete public Project Lab](https://arsh-project-lab.vercel.app/)**
 
 Review a user-controlled Windows/Android setup checklist; no device connection. Source-linked sample data is embedded for offline inspection. Search, group filters and CSV export work locally; checklist review marks (where available) are browser-local only. The page is not a live backend, and changes in this repository will require a separate Vercel deployment until a Git integration is enabled. [Dashboard validation source](tests/dashboard_ui.test.mjs).
+
+## Data modes and privacy (November 2026)
+
+- **Default:** The existing dashboard or portfolio view displays labeled synthetic or authored demonstration material. The GitHub profile index is the exception: it lists **actual public repositories** and uses separate synthetic UI tests, not invented projects.
+- **Public references:** Open the project's dashboard and choose a verified public source. Records load only when you click **Load public references**; source provenance and retrieval information appear alongside the results. Public references never overwrite fictional KPIs, audit findings, or simulated incident results.
+- **Local data:** Disabled for the public web interface. No local files, personal accounts, Windows logs, connected devices, or private GitHub repositories are imported. Other command-line utilities in this repository remain separate from the public web interface.
+- **Source policy:** See [source manifest](data/source-manifest.json). Public fetches may be limited by third-party availability, rate limits, and browser security restrictions; the synthetic view works without them.
+- **Safety:** Do not publish personal documents, tokens, passwords, real user-directory paths, or identifying log records. Existing Git history may retain older versions; replacing a current file does not erase history.
