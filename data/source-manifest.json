@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "project": "android-mcp-windows-setup",
+  "synthetic": {
+    "source": "offline setup checklist",
+    "mode": "default"
+  },
+  "public": [
+    {
+      "id": "scrcpy",
+      "label": "scrcpy releases · related tool",
+      "type": "releases",
+      "repo": "Genymobile"
+    },
+    {
+      "id": "kev",
+      "label": "CISA KEV Android references",
+      "type": "kev",
+      "terms": [
+        "android"
+      ]
+    }
+  ],
+  "localData": {
+    "enabled": false,
+    "fileImport": false,
+    "privateAccounts": false,
+    "deviceAccess": false
+  },
+  "dataPolicy": "Source date displayed. Public data fetched on user action only and never mixed into demo metrics. No private files or device information collected."
+}
